@@ -170,206 +170,206 @@
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Dodomu</h1>
-        <div id="userInfo"></div>
+<div class="header">
+    <h1>Dodomu</h1>
+    <div id="userInfo"></div>
+</div>
+
+<div class="container">
+    <div id="authSection" class="auth-container">
+        <h2>Iniciar Sesión / Registrarse</h2>
+        <form id="authForm">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Contraseña:</label>
+                <input type="password" id="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Iniciar Sesión / Registrarse</button>
+        </form>
     </div>
 
-    <div class="container">
-        <div id="authSection" class="auth-container">
-            <h2>Iniciar Sesión / Registrarse</h2>
-            <form id="authForm">
-                <div class="form-group">
-                    <label for="email">Email:</label>
-                    <input type="email" id="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">Contraseña:</label>
-                    <input type="password" id="password" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Iniciar Sesión / Registrarse</button>
-            </form>
-        </div>
-
-        <div id="mainSection" style="display: none;">
-            <button id="addPetBtn" class="btn btn-primary">Añadir Mascota</button>
-            <div id="petGrid" class="pet-grid"></div>
-        </div>
+    <div id="mainSection" style="display: none;">
+        <button id="addPetBtn" class="btn btn-primary">Añadir Mascota</button>
+        <div id="petGrid" class="pet-grid"></div>
     </div>
+</div>
 
-    <!-- Modal para añadir/editar mascota -->
-    <div id="petModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Añadir Mascota</h2>
-            <form id="petForm">
-                <div class="form-group">
-                    <label for="petImage">Imagen URL:</label>
-                    <input type="text" id="petImage" required>
-                </div>
-                <div class="form-group">
-                    <label for="petName">Nombre:</label>
-                    <input type="text" id="petName" required>
-                </div>
-                <div class="form-group">
-                    <label for="petSpecies">Especie:</label>
-                    <input type="text" id="petSpecies" required>
-                </div>
-                <div class="form-group">
-                    <label for="petBreed">Raza:</label>
-                    <input type="text" id="petBreed" required>
-                </div>
-                <div class="form-group">
-                    <label for="petWeight">Peso (kg):</label>
-                    <input type="number" id="petWeight" step="0.1" required>
-                </div>
-                <div class="form-group">
-                    <label for="petAge">Edad:</label>
-                    <input type="number" id="petAge" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Guardar</button>
-            </form>
-        </div>
+<!-- Modal para añadir/editar mascota -->
+<div id="petModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Añadir Mascota</h2>
+        <form id="petForm">
+            <div class="form-group">
+                <label for="petImage">Imagen URL:</label>
+                <input type="text" id="petImage" required>
+            </div>
+            <div class="form-group">
+                <label for="petName">Nombre:</label>
+                <input type="text" id="petName" required>
+            </div>
+            <div class="form-group">
+                <label for="petSpecies">Especie:</label>
+                <input type="text" id="petSpecies" required>
+            </div>
+            <div class="form-group">
+                <label for="petBreed">Raza:</label>
+                <input type="text" id="petBreed" required>
+            </div>
+            <div class="form-group">
+                <label for="petWeight">Peso (kg):</label>
+                <input type="number" id="petWeight" step="0.1" required>
+            </div>
+            <div class="form-group">
+                <label for="petAge">Edad:</label>
+                <input type="number" id="petAge" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+        </form>
     </div>
+</div>
 
-    <script>
-        // Clases para manejar los datos
-        class User {
-            constructor(email, password) {
-                this.email = email;
-                this.password = password;
-                this.pets = [];
-            }
+<script>
+    // Clases para manejar los datos
+    class User {
+        constructor(email, password) {
+            this.email = email;
+            this.password = password;
+            this.pets = [];
+        }
+    }
+
+    class Pet {
+        constructor(image, name, species, breed, weight, age) {
+            this.id = Date.now().toString();
+            this.image = image;
+            this.name = name;
+            this.species = species;
+            this.breed = breed;
+            this.weight = weight;
+            this.age = age;
+            this.tasks = [];
+            this.notes = [];
+            this.events = [];
+        }
+    }
+
+    class Task {
+        constructor(text) {
+            this.id = Date.now().toString();
+            this.text = text;
+            this.completed = false;
+        }
+    }
+
+    class Note {
+        constructor(title, text, tag) {
+            this.id = Date.now().toString();
+            this.title = title;
+            this.text = text;
+            this.date = new Date().toISOString();
+            this.tag = tag;
+        }
+    }
+
+    class Event {
+        constructor(title, date) {
+            this.id = Date.now().toString();
+            this.title = title;
+            this.date = date;
+        }
+    }
+
+    // Gestión del estado
+    let currentUser = null;
+
+    // Funciones de almacenamiento local
+    function saveToLocalStorage() {
+        if (currentUser) {
+            localStorage.setItem('users', JSON.stringify(
+                JSON.parse(localStorage.getItem('users') || '[]').map(user =>
+                    user.email === currentUser.email ? currentUser : user
+                )
+            ));
+        }
+    }
+
+    function loadFromLocalStorage() {
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        return users;
+    }
+
+    // Gestión de autenticación
+    document.getElementById('authForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        let users = loadFromLocalStorage();
+        let user = users.find(u => u.email === email);
+
+        if (!user) {
+            // Registrar nuevo usuario
+            user = new User(email, password);
+            users.push(user);
+            localStorage.setItem('users', JSON.stringify(users));
+        } else if (user.password !== password) {
+            alert('Contraseña incorrecta');
+            return;
         }
 
-        class Pet {
-            constructor(image, name, species, breed, weight, age) {
-                this.id = Date.now().toString();
-                this.image = image;
-                this.name = name;
-                this.species = species;
-                this.breed = breed;
-                this.weight = weight;
-                this.age = age;
-                this.tasks = [];
-                this.notes = [];
-                this.events = [];
-            }
-        }
+        currentUser = user;
+        document.getElementById('authSection').style.display = 'none';
+        document.getElementById('mainSection').style.display = 'block';
+        document.getElementById('userInfo').textContent = `Usuario: ${email}`;
+        renderPets();
+    });
 
-        class Task {
-            constructor(text) {
-                this.id = Date.now().toString();
-                this.text = text;
-                this.completed = false;
-            }
-        }
+    // Gestión de mascotas
+    document.getElementById('addPetBtn').addEventListener('click', () => {
+        document.getElementById('petModal').style.display = 'block';
+    });
 
-        class Note {
-            constructor(title, text, tag) {
-                this.id = Date.now().toString();
-                this.title = title;
-                this.text = text;
-                this.date = new Date().toISOString();
-                this.tag = tag;
-            }
-        }
+    document.querySelector('.close').addEventListener('click', () => {
+        document.getElementById('petModal').style.display = 'none';
+    });
 
-        class Event {
-            constructor(title, date) {
-                this.id = Date.now().toString();
-                this.title = title;
-                this.date = date;
-            }
-        }
+    document.getElementById('petForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const pet = new Pet(
+            document.getElementById('petImage').value,
+            document.getElementById('petName').value,
+            document.getElementById('petSpecies').value,
+            document.getElementById('petBreed').value,
+            document.getElementById('petWeight').value,
+            document.getElementById('petAge').value
+        );
 
-        // Gestión del estado
-        let currentUser = null;
+        currentUser.pets.push(pet);
+        saveToLocalStorage();
+        document.getElementById('petModal').style.display = 'none';
+        document.getElementById('petForm').reset();
+        renderPets();
+    });
 
-        // Funciones de almacenamiento local
-        function saveToLocalStorage() {
-            if (currentUser) {
-                localStorage.setItem('users', JSON.stringify(
-                    JSON.parse(localStorage.getItem('users') || '[]').map(user => 
-                        user.email === currentUser.email ? currentUser : user
-                    )
-                ));
-            }
-        }
+    function renderPets() {
+        const petGrid = document.getElementById('petGrid');
+        petGrid.innerHTML = '';
 
-        function loadFromLocalStorage() {
-            const users = JSON.parse(localStorage.getItem('users') || '[]');
-            return users;
-        }
-
-        // Gestión de autenticación
-        document.getElementById('authForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-
-            let users = loadFromLocalStorage();
-            let user = users.find(u => u.email === email);
-
-            if (!user) {
-                // Registrar nuevo usuario
-                user = new User(email, password);
-                users.push(user);
-                localStorage.setItem('users', JSON.stringify(users));
-            } else if (user.password !== password) {
-                alert('Contraseña incorrecta');
-                return;
-            }
-
-            currentUser = user;
-            document.getElementById('authSection').style.display = 'none';
-            document.getElementById('mainSection').style.display = 'block';
-            document.getElementById('userInfo').textContent = `Usuario: ${email}`;
-            renderPets();
-        });
-
-        // Gestión de mascotas
-        document.getElementById('addPetBtn').addEventListener('click', () => {
-            document.getElementById('petModal').style.display = 'block';
-        });
-
-        document.querySelector('.close').addEventListener('click', () => {
-            document.getElementById('petModal').style.display = 'none';
-        });
-
-        document.getElementById('petForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const pet = new Pet(
-                document.getElementById('petImage').value,
-                document.getElementById('petName').value,
-                document.getElementById('petSpecies').value,
-                document.getElementById('petBreed').value,
-                document.getElementById('petWeight').value,
-                document.getElementById('petAge').value
-            );
-
-            currentUser.pets.push(pet);
-            saveToLocalStorage();
-            document.getElementById('petModal').style.display = 'none';
-            document.getElementById('petForm').reset();
-            renderPets();
-        });
-
-        function renderPets() {
-            const petGrid = document.getElementById('petGrid');
-            petGrid.innerHTML = '';
-
-            currentUser.pets.forEach(pet => {
-                const petCard = document.createElement('div');
-                petCard.className = 'pet-card';
-                petCard.innerHTML = `
+        currentUser.pets.forEach(pet => {
+            const petCard = document.createElement('div');
+            petCard.className = 'pet-card';
+            petCard.innerHTML = `
                     <img src="${pet.image}" alt="${pet.name}" class="pet-image">
                     <h3>${pet.name}</h3>
                     <p>Especie: ${pet.species}</p>
                     <p>Raza: ${pet.breed}</p>
                     <p>Peso: ${pet.weight} kg</p>
                     <p>Edad: ${pet.age} años</p>
-                    
+
                     <div class="tab-container">
                         <div class="tab-buttons">
                             <button class="tab-button active" onclick="showTab(this, 'tasks-${pet.id}')">Tareas</button>
@@ -405,31 +405,31 @@
                         </div>
                     </div>
                 `;
-                petGrid.appendChild(petCard);
-            });
-        }
+            petGrid.appendChild(petCard);
+        });
+    }
 
-        function showTab(button, tabId) {
-            const tabContainer = button.closest('.tab-container');
-            tabContainer.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-            tabContainer.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            button.classList.add('active');
-            document.getElementById(tabId).classList.add('active');
-        }
+    function showTab(button, tabId) {
+        const tabContainer = button.closest('.tab-container');
+        tabContainer.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+        tabContainer.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        button.classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+    }
 
-        function renderTasks(pet) {
-            return pet.tasks.map(task => `
+    function renderTasks(pet) {
+        return pet.tasks.map(task => `
                 <div class="task-item ${task.completed ? 'completed' : ''}">
-                    <input type="checkbox" ${task.completed ? 'checked' : ''} 
+                    <input type="checkbox" ${task.completed ? 'checked' : ''}
                            onclick="toggleTask('${pet.id}', '${task.id}')">
                     <span>${task.text}</span>
                     <button onclick="deleteTask('${pet.id}', '${task.id}')" class="btn-danger">Eliminar</button>
                 </div>
             `).join('');
-        }
+    }
 
-        function renderNotes(pet) {
-            return pet.notes.map(note => `
+    function renderNotes(pet) {
+        return pet.notes.map(note => `
                 <div class="note-item">
                     <h4>${note.title}</h4>
                     <p>${note.text}</p>
@@ -437,7 +437,7 @@
                     <span class="date">${new Date(note.date).toLocaleDateString()}</span>
                 </div>
             `).join('');
-        }
+    }
 
     function renderEvents(pet) {
         return pet.events.map(event => `
@@ -453,7 +453,7 @@
     function addTask(petId) {
         const taskInput = document.getElementById(`task-input-${petId}`);
         const taskText = taskInput.value.trim();
-        
+
         if (taskText) {
             const pet = currentUser.pets.find(p => p.id === petId);
             if (pet) {
@@ -491,11 +491,11 @@
         const titleInput = document.getElementById(`note-title-${petId}`);
         const textInput = document.getElementById(`note-text-${petId}`);
         const tagInput = document.getElementById(`note-tag-${petId}`);
-        
+
         const title = titleInput.value.trim();
         const text = textInput.value.trim();
         const tag = tagInput.value.trim();
-        
+
         if (title && text) {
             const pet = currentUser.pets.find(p => p.id === petId);
             if (pet) {
@@ -513,10 +513,10 @@
     function addEvent(petId) {
         const titleInput = document.getElementById(`event-title-${petId}`);
         const dateInput = document.getElementById(`event-date-${petId}`);
-        
+
         const title = titleInput.value.trim();
         const date = dateInput.value;
-        
+
         if (title && date) {
             const pet = currentUser.pets.find(p => p.id === petId);
             if (pet) {
